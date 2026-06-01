@@ -1,0 +1,141 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'API Gateway for ECR Demo Services'
+
+Parameters:
+  TodoApiUrl:
+    Type: String
+    Default: 'http://localhost:3001'
+    Description: URL for Todo API
+
+  OrderServiceUrl:
+    Type: String
+    Default: 'http://localhost:3002'
+    Description: URL for Order Service
+
+  InventoryServiceUrl:
+    Type: String
+    Default: 'http://localhost:3003'
+    Description: URL for Inventory Service
+
+  SupplierServiceUrl:
+    Type: String
+    Default: 'http://localhost:3004'
+    Description: URL for Supplier Service
+
+Resources:
+  ApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: ecr-demo-api
+      Description: API Gateway for ECR Demo Services
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  TodoResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: todos
+
+  OrderResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: orders
+
+  InventoryResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: inventory
+
+  SupplierResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: suppliers
+
+  TodoGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref TodoResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Sub '${TodoApiUrl}/todos'
+
+  OrderGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref OrderResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Sub '${OrderServiceUrl}/orders'
+
+  InventoryGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref InventoryResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Sub '${InventoryServiceUrl}/inventory'
+
+  SupplierGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref SupplierResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP
+        IntegrationHttpMethod: GET
+        Uri: !Sub '${SupplierServiceUrl}/suppliers'
+
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - TodoGetMethod
+      - OrderGetMethod
+      - InventoryGetMethod
+      - SupplierGetMethod
+    Properties:
+      RestApiId: !Ref ApiGateway
+      StageName: dev
+
+Outputs:
+  ApiGatewayUrl:
+    Description: URL of the API Gateway
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev'
+
+  TodoEndpoint:
+    Description: Todo API Endpoint
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev/todos'
+
+  OrderEndpoint:
+    Description: Order Service Endpoint
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev/orders'
+
+  InventoryEndpoint:
+    Description: Inventory Service Endpoint
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev/inventory'
+
+  SupplierEndpoint:
+    Description: Supplier Service Endpoint
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev/suppliers'

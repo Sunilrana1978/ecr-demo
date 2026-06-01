@@ -1,0 +1,195 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'ECS Cluster and Task Definitions for ECR Demo Services'
+
+Parameters:
+  TodoApiImage:
+    Type: String
+    Default: 'node:18-alpine'
+    Description: Docker image for Todo API
+
+  OrderServiceImage:
+    Type: String
+    Default: 'node:18-alpine'
+    Description: Docker image for Order Service
+
+  InventoryServiceImage:
+    Type: String
+    Default: 'node:18-alpine'
+    Description: Docker image for Inventory Service
+
+  SupplierServiceImage:
+    Type: String
+    Default: 'node:18-alpine'
+    Description: Docker image for Supplier Service
+
+Resources:
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: ecr-demo-cluster
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+
+  CloudWatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /ecs/ecr-demo
+      RetentionInDays: 7
+
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+
+  TodoApiTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: todo-api-task
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: '256'
+      Memory: '512'
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: todo-api
+          Image: !Ref TodoApiImage
+          PortMappings:
+            - ContainerPort: 3001
+              Protocol: tcp
+          Environment:
+            - Name: PORT
+              Value: '3001'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: todo-api
+
+  OrderServiceTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: order-service-task
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: '256'
+      Memory: '512'
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: order-service
+          Image: !Ref OrderServiceImage
+          PortMappings:
+            - ContainerPort: 3002
+              Protocol: tcp
+          Environment:
+            - Name: PORT
+              Value: '3002'
+            - Name: INVENTORY_SERVICE_URL
+              Value: 'http://inventory-service:3003'
+            - Name: SUPPLIER_SERVICE_URL
+              Value: 'http://supplier-service:3004'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: order-service
+
+  InventoryServiceTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: inventory-service-task
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: '256'
+      Memory: '512'
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: inventory-service
+          Image: !Ref InventoryServiceImage
+          PortMappings:
+            - ContainerPort: 3003
+              Protocol: tcp
+          Environment:
+            - Name: PORT
+              Value: '3003'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: inventory-service
+
+  SupplierServiceTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: supplier-service-task
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: '256'
+      Memory: '512'
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: supplier-service
+          Image: !Ref SupplierServiceImage
+          PortMappings:
+            - ContainerPort: 3004
+              Protocol: tcp
+          Environment:
+            - Name: PORT
+              Value: '3004'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: supplier-service
+
+Outputs:
+  ECSClusterName:
+    Description: Name of the ECS Cluster
+    Value: !Ref ECSCluster
+
+  TodoApiTaskDefinitionArn:
+    Description: ARN of the Todo API Task Definition
+    Value: !Ref TodoApiTaskDefinition
+
+  OrderServiceTaskDefinitionArn:
+    Description: ARN of the Order Service Task Definition
+    Value: !Ref OrderServiceTaskDefinition
+
+  InventoryServiceTaskDefinitionArn:
+    Description: ARN of the Inventory Service Task Definition
+    Value: !Ref InventoryServiceTaskDefinition
+
+  SupplierServiceTaskDefinitionArn:
+    Description: ARN of the Supplier Service Task Definition
+    Value: !Ref SupplierServiceTaskDefinition

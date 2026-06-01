@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'ECR Repositories for ECR Demo Services'
+
+Resources:
+  TodoApiRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: todo-api
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: MUTABLE
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep last 10 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+  OrderServiceRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: order-service
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: MUTABLE
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep last 10 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+  InventoryServiceRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: inventory-service
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: MUTABLE
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep last 10 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+  SupplierServiceRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: supplier-service
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      ImageTagMutability: MUTABLE
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Keep last 10 images",
+                "selection": {
+                  "tagStatus": "any",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 10
+                },
+                "action": {
+                  "type": "expire"
+                }
+              }
+            ]
+          }
+
+Outputs:
+  TodoApiRepositoryUri:
+    Description: URI of the Todo API ECR Repository
+    Value: !GetAtt TodoApiRepository.RepositoryUri
+
+  OrderServiceRepositoryUri:
+    Description: URI of the Order Service ECR Repository
+    Value: !GetAtt OrderServiceRepository.RepositoryUri
+
+  InventoryServiceRepositoryUri:
+    Description: URI of the Inventory Service ECR Repository
+    Value: !GetAtt InventoryServiceRepository.RepositoryUri
+
+  SupplierServiceRepositoryUri:
+    Description: URI of the Supplier Service ECR Repository
+    Value: !GetAtt SupplierServiceRepository.RepositoryUri
