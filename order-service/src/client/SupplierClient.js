@@ -1,27 +1,17 @@
-import axios from 'axios';
+import { HttpClient } from '@shared/http-client';
 
-export class SupplierClient {
+export class SupplierClient extends HttpClient {
   constructor(baseUrl) {
-    this.baseUrl = baseUrl || process.env.SUPPLIER_SERVICE_URL || 'http://localhost:3004';
+    const url = baseUrl || process.env.SUPPLIER_SERVICE_URL || 'http://localhost:3004';
+    super(url, 'SupplierService');
   }
 
   async getAllSuppliers() {
-    try {
-      const response = await axios.get(`${this.baseUrl}/suppliers`);
-      return response.data;
-    } catch (error) {
-      console.error('Get suppliers failed:', error.message);
-      return [];
-    }
+    return this.get('/api/suppliers');
   }
 
   async getSupplierById(id) {
-    try {
-      const response = await axios.get(`${this.baseUrl}/suppliers/${id}`);
-      return response.data;
-    } catch (error) {
-      console.error('Get supplier failed:', error.message);
-      return null;
-    }
+    return this.get(`/api/suppliers/${id}`);
   }
 }
+

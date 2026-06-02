@@ -1,46 +1,16 @@
+import { BaseRepository } from '@shared/repositories';
 import { Supplier } from '../models/Supplier.js';
 
-export class SupplierRepository {
+export class SupplierRepository extends BaseRepository {
   constructor() {
-    this.suppliers = new Map();
-    this.nextId = 1;
+    super(Supplier);
     this.initializeSampleData();
   }
 
   initializeSampleData() {
-    this.create('Tech Supplies Inc', 'info@techsupplies.com', '+1-555-0001', 4.5);
-    this.create('Global Electronics', 'contact@globalelectronics.com', '+1-555-0002', 4.8);
-    this.create('Premium Parts Co', 'support@premiumparts.com', '+1-555-0003', 4.2);
-  }
-
-  findAll() {
-    return Array.from(this.suppliers.values());
-  }
-
-  findById(id) {
-    return this.suppliers.get(parseInt(id));
-  }
-
-  create(name, email, phone, rating) {
-    const id = this.nextId++;
-    const supplier = new Supplier(id, name, email, phone, rating);
-    this.suppliers.set(id, supplier);
-    return supplier;
-  }
-
-  update(id, name, email, phone, rating) {
-    const supplier = this.suppliers.get(parseInt(id));
-    if (supplier) {
-      if (name) supplier.name = name;
-      if (email) supplier.email = email;
-      if (phone) supplier.phone = phone;
-      if (rating !== undefined) supplier.rating = rating;
-      return supplier;
-    }
-    return null;
-  }
-
-  delete(id) {
-    return this.suppliers.delete(parseInt(id));
+    this.create({ name: 'Tech Supplies Inc', email: 'info@techsupplies.com', phone: '+1-555-0001', rating: 4.5 });
+    this.create({ name: 'Global Electronics', email: 'contact@globalelectronics.com', phone: '+1-555-0002', rating: 4.8 });
+    this.create({ name: 'Premium Parts Co', email: 'support@premiumparts.com', phone: '+1-555-0003', rating: 4.2 });
   }
 }
+

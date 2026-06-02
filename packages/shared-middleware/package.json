@@ -1,0 +1,13 @@
+{
+  "name": "@shared/middleware",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0"
+  },
+  "license": "MIT"
+}

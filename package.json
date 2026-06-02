@@ -1,0 +1,19 @@
+{
+  "name": "ecr-demo",
+  "version": "1.0.0",
+  "description": "ECR Demo - Node.js Microservices & REST API",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "todo-api",
+    "order-service",
+    "inventory-service",
+    "supplier-service"
+  ],
+  "scripts": {
+    "dev": "echo 'Start individual services with npm run dev in their directories'",
+    "install-all": "npm install && npm install --workspace packages/shared-errors --workspace packages/shared-middleware --workspace packages/shared-validation --workspace packages/shared-repositories --workspace packages/shared-http-client --workspace packages/shared-server"
+  },
+  "license": "MIT"
+}

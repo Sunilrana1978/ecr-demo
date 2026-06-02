@@ -1,44 +1,20 @@
+import { BaseRepository } from '@shared/repositories';
 import { InventoryItem } from '../models/InventoryItem.js';
 
-export class InventoryRepository {
+export class InventoryRepository extends BaseRepository {
   constructor() {
-    this.items = new Map();
-    this.nextId = 1;
+    super(InventoryItem);
     this.initializeSampleData();
   }
 
   initializeSampleData() {
-    this.create('Laptop', 'LAPTOP-001', 10, 999.99);
-    this.create('Mouse', 'MOUSE-001', 50, 29.99);
-    this.create('Keyboard', 'KB-001', 30, 79.99);
-  }
-
-  findAll() {
-    return Array.from(this.items.values());
-  }
-
-  findById(id) {
-    return this.items.get(parseInt(id));
+    this.create({ name: 'Laptop', sku: 'LAPTOP-001', quantity: 10, price: 999.99 });
+    this.create({ name: 'Mouse', sku: 'MOUSE-001', quantity: 50, price: 29.99 });
+    this.create({ name: 'Keyboard', sku: 'KB-001', quantity: 30, price: 79.99 });
   }
 
   findBySku(sku) {
-    return Array.from(this.items.values()).find(item => item.sku === sku);
-  }
-
-  create(name, sku, quantity, price) {
-    const id = this.nextId++;
-    const item = new InventoryItem(id, name, sku, quantity, price);
-    this.items.set(id, item);
-    return item;
-  }
-
-  update(id, quantity) {
-    const item = this.items.get(parseInt(id));
-    if (item) {
-      item.quantity = quantity;
-      return item;
-    }
-    return null;
+    return Array.from(this.storage.values()).find(item => item.sku === sku);
   }
 
   deductStock(sku, quantity) {
@@ -48,8 +24,5 @@ export class InventoryRepository {
     item.quantity -= quantity;
     return item;
   }
-
-  delete(id) {
-    return this.items.delete(parseInt(id));
-  }
 }
+

@@ -1,47 +1,62 @@
+import { NotFoundError } from '@shared/errors';
+
 export class SupplierController {
   constructor(repository) {
     this.repository = repository;
   }
 
-  getAllSuppliers(req, res) {
-    const suppliers = this.repository.findAll();
-    res.json(suppliers);
+  async getAllSuppliers(req, res, next) {
+    try {
+      const suppliers = this.repository.findAll();
+      res.json(suppliers);
+    } catch (error) {
+      next(error);
+    }
   }
 
-  getSupplierById(req, res) {
-    const { id } = req.params;
-    const supplier = this.repository.findById(id);
-    if (!supplier) {
-      return res.status(404).json({ error: 'Supplier not found' });
+  async getSupplierById(req, res, next) {
+    try {
+      const { id } = req.params;
+      const supplier = this.repository.findById(id);
+      if (!supplier) throw new NotFoundError('Supplier', id);
+      res.json(supplier);
+    } catch (error) {
+      next(error);
     }
-    res.json(supplier);
   }
 
-  createSupplier(req, res) {
-    const { name, email, phone, rating } = req.body;
-    if (!name || !email || !phone) {
-      return res.status(400).json({ error: 'Missing required fields' });
+  async createSupplier(req, res, next) {
+    try {
+      const data = req.validatedBody;
+      const supplier = this.repository.create(data);
+      res.status(201).json(supplier);
+    } catch (error) {
+      next(error);
     }
-    const supplier = this.repository.create(name, email, phone, rating || 4.0);
-    res.status(201).json(supplier);
   }
 
-  updateSupplier(req, res) {
-    const { id } = req.params;
-    const { name, email, phone, rating } = req.body;
-    const supplier = this.repository.update(id, name, email, phone, rating);
-    if (!supplier) {
-      return res.status(404).json({ error: 'Supplier not found' });
+  async updateSupplier(req, res, next) {
+    try {
+      const { id } = req.params;
+      const data = req.validatedBody;
+      const supplier = this.repository.update(id, data);
+      if (!supplier) throw new NotFoundError('Supplier', id);
+      res.json(supplier);
+    } catch (error) {
+      next(error);
     }
-    res.json(supplier);
   }
 
-  deleteSupplier(req, res) {
-    const { id } = req.params;
-    const deleted = this.repository.delete(id);
-    if (!deleted) {
-      return res.status(404).json({ error: 'Supplier not found' });
+  async deleteSupplier(req, res, next) {
+    try {
+      const { id } = req.params;
+      const supplier = this.repository.findById(id);
+      if (!supplier) throw new NotFoundError('Supplier', id);
+      this.repository.delete(id);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
     }
-    res.status(204).send();
   }
 }
+

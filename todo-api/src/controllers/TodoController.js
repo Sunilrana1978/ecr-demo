@@ -1,47 +1,68 @@
+import { NotFoundError } from '@shared/errors';
+
 export class TodoController {
   constructor(repository) {
     this.repository = repository;
   }
 
-  getAllTodos(req, res) {
-    const todos = this.repository.findAll();
-    res.json(todos);
+  async getAllTodos(req, res, next) {
+    try {
+      const todos = this.repository.findAll();
+      res.json(todos);
+    } catch (error) {
+      next(error);
+    }
   }
 
-  getTodoById(req, res) {
-    const { id } = req.params;
-    const todo = this.repository.findById(id);
-    if (!todo) {
-      return res.status(404).json({ error: 'Todo not found' });
+  async getTodoById(req, res, next) {
+    try {
+      const { id } = req.params;
+      const todo = this.repository.findById(id);
+      if (!todo) {
+        throw new NotFoundError('Todo', id);
+      }
+      res.json(todo);
+    } catch (error) {
+      next(error);
     }
-    res.json(todo);
   }
 
-  createTodo(req, res) {
-    const { title, description } = req.body;
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
+  async createTodo(req, res, next) {
+    try {
+      const data = req.validatedBody;
+      const todo = this.repository.create(data);
+      res.status(201).json(todo);
+    } catch (error) {
+      next(error);
     }
-    const todo = this.repository.create(title, description || '');
-    res.status(201).json(todo);
   }
 
-  updateTodo(req, res) {
-    const { id } = req.params;
-    const { title, description, completed } = req.body;
-    const todo = this.repository.update(id, title, description, completed);
-    if (!todo) {
-      return res.status(404).json({ error: 'Todo not found' });
+  async updateTodo(req, res, next) {
+    try {
+      const { id } = req.params;
+      const data = req.validatedBody;
+      const todo = this.repository.update(id, data);
+      if (!todo) {
+        throw new NotFoundError('Todo', id);
+      }
+      res.json(todo);
+    } catch (error) {
+      next(error);
     }
-    res.json(todo);
   }
 
-  deleteTodo(req, res) {
-    const { id } = req.params;
-    const deleted = this.repository.delete(id);
-    if (!deleted) {
-      return res.status(404).json({ error: 'Todo not found' });
+  async deleteTodo(req, res, next) {
+    try {
+      const { id } = req.params;
+      const todo = this.repository.findById(id);
+      if (!todo) {
+        throw new NotFoundError('Todo', id);
+      }
+      this.repository.delete(id);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
     }
-    res.status(204).send();
   }
 }
+

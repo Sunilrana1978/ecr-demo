@@ -1,0 +1,15 @@
+{
+  "name": "@shared/server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "@shared/middleware": "*",
+    "@shared/errors": "*"
+  },
+  "license": "MIT"
+}

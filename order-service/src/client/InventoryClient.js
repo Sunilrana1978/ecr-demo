@@ -1,33 +1,17 @@
-import axios from 'axios';
+import { HttpClient } from '@shared/http-client';
 
-export class InventoryClient {
+export class InventoryClient extends HttpClient {
   constructor(baseUrl) {
-    this.baseUrl = baseUrl || process.env.INVENTORY_SERVICE_URL || 'http://localhost:3003';
+    const url = baseUrl || process.env.INVENTORY_SERVICE_URL || 'http://localhost:3003';
+    super(url, 'InventoryService');
   }
 
   async checkInventory(sku, quantity) {
-    try {
-      const response = await axios.post(`${this.baseUrl}/inventory/check`, {
-        sku,
-        quantity
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Inventory check failed:', error.message);
-      return { available: false };
-    }
+    return this.post('/api/inventory/check', { sku, quantity });
   }
 
   async deductStock(sku, quantity) {
-    try {
-      const response = await axios.post(`${this.baseUrl}/inventory/deduct`, {
-        sku,
-        quantity
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Stock deduction failed:', error.message);
-      return { success: false };
-    }
+    return this.post('/api/inventory/deduct', { sku, quantity });
   }
 }
+
